@@ -1,0 +1,1322 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2026 부산대학교 직무연수 종합 안내</title>
+  <!-- Pretendard Font CDN -->
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <!-- FontAwesome Icons CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <!-- PapaParse for robust CSV parsing -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
+  <style>
+    :root {
+      --pnu-blue-dark: #07192f;
+      --pnu-blue: #0b2545;
+      --pnu-blue-light: #134074;
+      --pnu-royal: #1d4ed8;
+      --pnu-gold: #c59b27;
+      --pnu-gold-light: #fef3c7;
+      --pnu-gold-dark: #92400e;
+      --accent-coral: #e11d48;
+      
+      --bg-body: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-surface-subtle: #f1f5f9;
+      --border-subtle: #e2e8f0;
+      --border-strong: #cbd5e1;
+      
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --text-subtle: #94a3b8;
+      --text-inverted: #ffffff;
+
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --radius-full: 9999px;
+
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(11, 37, 69, 0.08), 0 2px 4px -2px rgba(11, 37, 69, 0.05);
+      --shadow-lg: 0 10px 25px -3px rgba(11, 37, 69, 0.1), 0 4px 6px -4px rgba(11, 37, 69, 0.05);
+      --shadow-card: 0 2px 10px rgba(15, 23, 42, 0.04);
+      --shadow-card-hover: 0 12px 28px -4px rgba(11, 37, 69, 0.14);
+      
+      --transition-fast: 0.15s ease;
+      --transition-normal: 0.25s ease;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Navigation Bar */
+    .top-nav {
+      background-color: var(--pnu-blue-dark);
+      color: var(--text-inverted);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(8px);
+    }
+    .top-nav-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0.85rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .brand-link {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: inherit;
+    }
+    .brand-emblem {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--pnu-gold), #eab308);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--pnu-blue-dark);
+      font-weight: 900;
+      font-size: 1.1rem;
+      box-shadow: 0 2px 8px rgba(197, 155, 39, 0.4);
+    }
+    .brand-text h1 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .brand-text span {
+      font-size: 0.75rem;
+      color: #94a3b8;
+      display: block;
+      font-weight: 500;
+    }
+    .nav-status {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      font-size: 0.825rem;
+    }
+    .sync-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 0.35rem 0.75rem;
+      border-radius: var(--radius-full);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #e2e8f0;
+      font-weight: 500;
+    }
+    .pulse-dot {
+      width: 7px;
+      height: 7px;
+      background-color: #10b981;
+      border-radius: 50%;
+      box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+      70% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+    .btn-refresh {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #cbd5e1;
+      padding: 0.35rem 0.75rem;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.8rem;
+      transition: var(--transition-fast);
+    }
+    .btn-refresh:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    /* Hero Section */
+    .hero {
+      background: linear-gradient(180deg, var(--pnu-blue-dark) 0%, var(--pnu-blue) 100%);
+      color: var(--text-inverted);
+      padding: 3.5rem 1.5rem 3rem;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .hero-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+    .hero-tagline {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(197, 155, 39, 0.15);
+      border: 1px solid rgba(197, 155, 39, 0.35);
+      color: #fde047;
+      padding: 0.25rem 0.85rem;
+      border-radius: var(--radius-full);
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .hero-title {
+      font-size: 2.25rem;
+      font-weight: 800;
+      line-height: 1.25;
+      letter-spacing: -0.03em;
+      margin-bottom: 0.85rem;
+    }
+    .hero-title span {
+      color: #93c5fd;
+    }
+    .hero-desc {
+      font-size: 1.05rem;
+      color: #cbd5e1;
+      max-width: 720px;
+      margin-bottom: 2rem;
+      line-height: 1.6;
+    }
+
+    /* Metric HUD Cards */
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .metric-card {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: var(--radius-md);
+      padding: 1.2rem 1.4rem;
+      backdrop-filter: blur(4px);
+      transition: var(--transition-fast);
+    }
+    .metric-card:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateY(-2px);
+    }
+    .metric-label {
+      font-size: 0.825rem;
+      color: #94a3b8;
+      margin-bottom: 0.4rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .metric-value {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: #ffffff;
+      display: flex;
+      align-items: baseline;
+      gap: 0.25rem;
+    }
+    .metric-value small {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: #94a3b8;
+    }
+
+    /* Main Container */
+    .container {
+      max-width: 1280px;
+      margin: -1.5rem auto 3rem;
+      padding: 0 1.5rem;
+      width: 100%;
+      flex: 1;
+    }
+
+    /* Filter & Search Panel */
+    .control-panel {
+      background: var(--bg-surface);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-subtle);
+      box-shadow: var(--shadow-lg);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    /* Search Box Row */
+    .search-row {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      margin-bottom: 1.25rem;
+    }
+    .search-input-wrapper {
+      position: relative;
+      flex: 1;
+    }
+    .search-input-wrapper i {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 1rem;
+    }
+    .search-input {
+      width: 100%;
+      padding: 0.85rem 1rem 0.85rem 2.75rem;
+      font-size: 0.975rem;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      background: var(--bg-surface);
+      color: var(--text-main);
+      outline: none;
+      transition: var(--transition-fast);
+      font-family: inherit;
+    }
+    .search-input:focus {
+      border-color: var(--pnu-royal);
+      box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.15);
+    }
+    .search-clear-btn {
+      position: absolute;
+      right: 0.85rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--text-subtle);
+      cursor: pointer;
+      font-size: 0.9rem;
+      display: none;
+    }
+    .search-clear-btn:hover {
+      color: var(--text-main);
+    }
+
+    .sort-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .sort-select {
+      padding: 0.85rem 1.25rem;
+      font-size: 0.9rem;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      background: var(--bg-surface);
+      color: var(--text-main);
+      outline: none;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 500;
+    }
+    .sort-select:focus {
+      border-color: var(--pnu-royal);
+    }
+
+    /* Category Filter Tabs (Horizontal Scrollable) */
+    .category-tabs-container {
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 1rem;
+      margin-bottom: 1.25rem;
+    }
+    .category-tabs-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.6rem;
+    }
+    .category-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .category-tab {
+      background: var(--bg-surface-subtle);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      padding: 0.45rem 0.95rem;
+      border-radius: var(--radius-full);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: var(--transition-fast);
+      user-select: none;
+    }
+    .category-tab:hover {
+      background: #e2e8f0;
+      color: var(--text-main);
+    }
+    .category-tab.active {
+      background: var(--pnu-blue);
+      color: var(--text-inverted);
+      border-color: var(--pnu-blue);
+      box-shadow: 0 2px 6px rgba(11, 37, 69, 0.25);
+    }
+    .category-tab .count {
+      font-size: 0.75rem;
+      padding: 0.1rem 0.4rem;
+      border-radius: var(--radius-full);
+      background: rgba(0, 0, 0, 0.08);
+    }
+    .category-tab.active .count {
+      background: rgba(255, 255, 255, 0.2);
+      color: #ffffff;
+    }
+
+    /* Secondary Multi-Filter Row */
+    .multi-filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.25rem;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 0.5rem;
+    }
+    .facet-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .facet-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      min-width: 50px;
+    }
+    .facet-chips {
+      display: flex;
+      gap: 0.35rem;
+    }
+    .facet-chip {
+      background: transparent;
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      padding: 0.3rem 0.75rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+    .facet-chip:hover {
+      background: var(--bg-surface-subtle);
+      color: var(--text-main);
+    }
+    .facet-chip.active {
+      background: #e0e7ff;
+      border-color: #818cf8;
+      color: #3730a3;
+      font-weight: 600;
+    }
+
+    .reset-btn {
+      background: none;
+      border: 1px dashed var(--border-strong);
+      color: var(--text-muted);
+      padding: 0.35rem 0.85rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.8rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: var(--transition-fast);
+    }
+    .reset-btn:hover {
+      background: #fee2e2;
+      border-color: #fca5a5;
+      color: #b91c1c;
+    }
+
+    /* Results Header */
+    .results-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+      padding: 0 0.25rem;
+    }
+    .results-count {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    .results-count strong {
+      color: var(--pnu-blue);
+      font-weight: 800;
+    }
+
+    /* Course Cards Grid */
+    .course-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .course-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform var(--transition-normal), box-shadow var(--transition-normal), border-color var(--transition-normal);
+      position: relative;
+      cursor: pointer;
+    }
+    .course-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-card-hover);
+      border-color: #93c5fd;
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.85rem;
+      gap: 0.5rem;
+    }
+    .course-code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--pnu-blue-light);
+      background: #f1f5f9;
+      padding: 0.2rem 0.55rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid #cbd5e1;
+    }
+    .card-badges {
+      display: flex;
+      gap: 0.35rem;
+      flex-wrap: wrap;
+    }
+    .badge {
+      font-size: 0.725rem;
+      font-weight: 700;
+      padding: 0.2rem 0.55rem;
+      border-radius: var(--radius-sm);
+      letter-spacing: -0.01em;
+    }
+    .badge-mandatory {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+    }
+    .badge-recommended {
+      background: #dbeafe;
+      color: #1e40af;
+      border: 1px solid #bfdbfe;
+    }
+    .badge-optional {
+      background: #f1f5f9;
+      color: #475569;
+      border: 1px solid #e2e8f0;
+    }
+    .badge-method-online {
+      background: #d1fae5;
+      color: #065f46;
+      border: 1px solid #a7f3d0;
+    }
+    .badge-method-offline {
+      background: #fef3c7;
+      color: #92400e;
+      border: 1px solid #fde68a;
+    }
+    .badge-method-hybrid {
+      background: #ede9fe;
+      color: #5b21b6;
+      border: 1px solid #ddd6fe;
+    }
+
+    .card-category {
+      font-size: 0.8rem;
+      color: var(--pnu-blue-light);
+      font-weight: 600;
+      margin-bottom: 0.35rem;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .card-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1.4;
+      margin-bottom: 0.65rem;
+      letter-spacing: -0.02em;
+    }
+    .card-summary {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+      margin-bottom: 1.25rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      min-height: 2.7rem;
+    }
+
+    .card-meta-list {
+      background: var(--bg-surface-subtle);
+      border-radius: var(--radius-md);
+      padding: 0.85rem 1rem;
+      margin-bottom: 1.25rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem 0.75rem;
+      font-size: 0.8rem;
+    }
+    .card-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      color: var(--text-muted);
+    }
+    .card-meta-item i {
+      color: var(--pnu-blue-light);
+      width: 14px;
+      text-align: center;
+    }
+    .card-meta-item strong {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    .card-footer {
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .card-dept {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    .card-action-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--pnu-royal);
+      text-decoration: none;
+      transition: gap var(--transition-fast);
+    }
+    .course-card:hover .card-action-btn {
+      gap: 0.6rem;
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 4rem 1.5rem;
+      background: var(--bg-surface);
+      border-radius: var(--radius-lg);
+      border: 1px dashed var(--border-strong);
+      grid-column: 1 / -1;
+      display: none;
+    }
+    .empty-state i {
+      font-size: 3rem;
+      color: var(--text-subtle);
+      margin-bottom: 1rem;
+    }
+    .empty-state h3 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 0.5rem;
+    }
+    .empty-state p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 1.5rem;
+    }
+
+    /* Skeleton Loading State */
+    .skeleton-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 1.5rem;
+    }
+    .skeleton-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      height: 280px;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .skeleton-line {
+      background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: var(--radius-sm);
+    }
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* Footer */
+    footer {
+      background: var(--pnu-blue-dark);
+      color: #94a3b8;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 2.5rem 1.5rem;
+      margin-top: auto;
+      font-size: 0.85rem;
+    }
+    .footer-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 1.5rem;
+      align-items: center;
+    }
+    .footer-brand {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+    .footer-brand strong {
+      color: #ffffff;
+      font-size: 1rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .hero-title { font-size: 1.75rem; }
+      .search-row { flex-direction: column; }
+      .course-grid { grid-template-columns: 1fr; }
+      .card-meta-list { grid-template-columns: 1fr; }
+      .multi-filter-row { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation -->
+  <header class="top-nav">
+    <div class="top-nav-inner">
+      <a href="index.html" class="brand-link">
+        <div class="brand-emblem">PNU</div>
+        <div class="brand-text">
+          <h1>부산대학교 직무연수 종합 안내</h1>
+          <span>2026 Pusan National University HRD Portal</span>
+        </div>
+      </a>
+      <div class="nav-status">
+        <div class="sync-badge" id="syncStatus">
+          <span class="pulse-dot"></span>
+          <span>구글 시트 실시간 연동 중</span>
+        </div>
+        <button class="btn-refresh" id="btnRefresh" title="구글 시트 데이터 새로고침">
+          <i class="fa-solid fa-arrows-rotate"></i>
+          <span>새로고침</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section with Live Metric Counters -->
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="hero-tagline">
+        <i class="fa-solid fa-graduation-cap"></i> 2026학년도 교직원 직무역량 강화 프로그램
+      </div>
+      <h2 class="hero-title">
+        더 나은 행정, 신뢰받는 대학을 위한<br>
+        <span>부산대학교 직무연수</span> 포털
+      </h2>
+      <p class="hero-desc">
+        법정의무교육부터 생성형 AI 실무, 예산·회계, 대학행정 특화 과정까지 — 교직원 여러분의 실무 경쟁력과 직무 적응을 지원하는 32개 교육과정을 실시간으로 확인하고 신청하세요.
+      </p>
+
+      <!-- Metric Cards HUD -->
+      <div class="metric-grid">
+        <div class="metric-card">
+          <div class="metric-label"><i class="fa-solid fa-book-open"></i> 전체 교육과정</div>
+          <div class="metric-value" id="statTotal">-<small>개 과정</small></div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label"><i class="fa-solid fa-triangle-exclamation"></i> 법정의무(필수)</div>
+          <div class="metric-value" id="statMandatory" style="color: #f87171;">-<small>개</small></div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label"><i class="fa-solid fa-laptop"></i> 상시 온라인 과정</div>
+          <div class="metric-value" id="statOnline" style="color: #6ee7b7;">-<small>개</small></div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label"><i class="fa-solid fa-clock-rotate-left"></i> 데이터 기준</div>
+          <div class="metric-value" id="statSyncTime" style="font-size: 1.15rem; font-weight: 600;">실시간 동기화</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content Container -->
+  <main class="container">
+
+    <!-- Search & Filter Control Panel -->
+    <section class="control-panel">
+      <!-- Search and Sort Row -->
+      <div class="search-row">
+        <div class="search-input-wrapper">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="searchInput" class="search-input" placeholder="과정명, 과정코드(PNU-2026-...), 담당부서, 주요 내용으로 검색..." autocomplete="off">
+          <button id="searchClearBtn" class="search-clear-btn" title="검색어 지우기">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="sort-wrapper">
+          <select id="sortSelect" class="sort-select">
+            <option value="code-asc">과정코드 순</option>
+            <option value="name-asc">과정명 가나다 순</option>
+            <option value="hours-desc">교육시간 긴 순</option>
+            <option value="hours-asc">교육시간 짧은 순</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Category Filter Tabs -->
+      <div class="category-tabs-container">
+        <div class="category-tabs-label">교육 분야별 보기</div>
+        <div class="category-tabs" id="categoryTabs">
+          <button class="category-tab active" data-category="all">
+            전체 <span class="count" id="countAll">0</span>
+          </button>
+          <!-- Dynamic category tabs injected by JS -->
+        </div>
+      </div>
+
+      <!-- Secondary Multi-Facet Filters -->
+      <div class="multi-filter-row">
+        <!-- Target Facet -->
+        <div class="facet-group">
+          <span class="facet-label">대상</span>
+          <div class="facet-chips" id="targetChips">
+            <button class="facet-chip active" data-facet="target" data-value="all">전체</button>
+            <button class="facet-chip" data-facet="target" data-value="전 직원">전 직원</button>
+            <button class="facet-chip" data-facet="target" data-value="실무자">실무자</button>
+            <button class="facet-chip" data-facet="target" data-value="관리자">관리자</button>
+            <button class="facet-chip" data-facet="target" data-value="신규자">신규자</button>
+          </div>
+        </div>
+
+        <!-- Completion Requirement Facet -->
+        <div class="facet-group">
+          <span class="facet-label">이수구분</span>
+          <div class="facet-chips" id="requirementChips">
+            <button class="facet-chip active" data-facet="req" data-value="all">전체</button>
+            <button class="facet-chip" data-facet="req" data-value="필수">필수</button>
+            <button class="facet-chip" data-facet="req" data-value="권장">권장</button>
+            <button class="facet-chip" data-facet="req" data-value="선택">선택</button>
+          </div>
+        </div>
+
+        <!-- Method Facet -->
+        <div class="facet-group">
+          <span class="facet-label">교육방식</span>
+          <div class="facet-chips" id="methodChips">
+            <button class="facet-chip active" data-facet="method" data-value="all">전체</button>
+            <button class="facet-chip" data-facet="method" data-value="온라인">온라인</button>
+            <button class="facet-chip" data-facet="method" data-value="집합">집합</button>
+            <button class="facet-chip" data-facet="method" data-value="혼합">혼합</button>
+          </div>
+        </div>
+
+        <!-- Reset Button -->
+        <button id="btnResetFilters" class="reset-btn">
+          <i class="fa-solid fa-rotate-left"></i> 필터 초기화
+        </button>
+      </div>
+    </section>
+
+    <!-- Results Header -->
+    <div class="results-header">
+      <div class="results-count">
+        총 <strong id="filteredCount">0</strong>개의 직무연수 과정이 검색되었습니다.
+      </div>
+    </div>
+
+    <!-- Skeleton Loader while fetching -->
+    <div class="skeleton-grid" id="skeletonLoader">
+      <div class="skeleton-card"><div class="skeleton-line" style="height: 24px; width: 40%;"></div><div class="skeleton-line" style="height: 32px; width: 85%;"></div><div class="skeleton-line" style="height: 48px; width: 100%;"></div><div class="skeleton-line" style="height: 60px; width: 100%;"></div></div>
+      <div class="skeleton-card"><div class="skeleton-line" style="height: 24px; width: 40%;"></div><div class="skeleton-line" style="height: 32px; width: 85%;"></div><div class="skeleton-line" style="height: 48px; width: 100%;"></div><div class="skeleton-line" style="height: 60px; width: 100%;"></div></div>
+      <div class="skeleton-card"><div class="skeleton-line" style="height: 24px; width: 40%;"></div><div class="skeleton-line" style="height: 32px; width: 85%;"></div><div class="skeleton-line" style="height: 48px; width: 100%;"></div><div class="skeleton-line" style="height: 60px; width: 100%;"></div></div>
+    </div>
+
+    <!-- Course Cards Grid -->
+    <div class="course-grid" id="courseGrid"></div>
+
+    <!-- Empty State -->
+    <div class="empty-state" id="emptyState">
+      <i class="fa-regular fa-folder-open"></i>
+      <h3>일치하는 교육과정이 없습니다</h3>
+      <p>검색어를 변경하거나 적용된 필터 조건을 재설정해 보세요.</p>
+      <button class="reset-btn" onclick="resetAllFilters()" style="display: inline-flex; padding: 0.6rem 1.25rem;">
+        <i class="fa-solid fa-rotate-left"></i> 모든 필터 초기화
+      </button>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <strong>부산대학교 교육훈련 안내 시스템</strong>
+        <span>본 사이트는 구글 스프레드시트와 실시간 연동되어 2026학년도 연수 계획을 안내합니다.</span>
+      </div>
+      <div>
+        <span>문의: 인재개발원 (051-510-1231) | 부산광역시 금정구 부산대학로63번길 2</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Configuration
+    const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1sWeq6LCPTp0I6ith07XQizLm-KcDvAcbeNZBHkOBOvk/gviz/tq?tqx=out:csv&sheet=data&headers=1';
+
+    // State
+    let allCourses = [];
+    let currentFilters = {
+      search: '',
+      category: 'all',
+      target: 'all',
+      req: 'all',
+      method: 'all',
+      sort: 'code-asc'
+    };
+
+    // DOM Elements
+    const courseGrid = document.getElementById('courseGrid');
+    const skeletonLoader = document.getElementById('skeletonLoader');
+    const emptyState = document.getElementById('emptyState');
+    const filteredCountEl = document.getElementById('filteredCount');
+    const searchInput = document.getElementById('searchInput');
+    const searchClearBtn = document.getElementById('searchClearBtn');
+    const sortSelect = document.getElementById('sortSelect');
+    const categoryTabs = document.getElementById('categoryTabs');
+    const btnRefresh = document.getElementById('btnRefresh');
+    const btnResetFilters = document.getElementById('btnResetFilters');
+
+    // Stats
+    const statTotal = document.getElementById('statTotal');
+    const statMandatory = document.getElementById('statMandatory');
+    const statOnline = document.getElementById('statOnline');
+    const statSyncTime = document.getElementById('statSyncTime');
+
+    // Load Data from Google Sheets
+    async function loadData() {
+      skeletonLoader.style.display = 'grid';
+      courseGrid.innerHTML = '';
+      emptyState.style.display = 'none';
+
+      try {
+        // Cache-busting URL to ensure real-time changes in Google Sheets reflect immediately
+        const fetchUrl = `${SHEET_CSV_URL}&_cb=${Date.now()}`;
+        const response = await fetch(fetchUrl);
+        if (!response.ok) throw new Error('구글 시트 데이터를 불러오지 못했습니다.');
+        
+        const csvText = await response.text();
+        
+        Papa.parse(csvText, {
+          header: true,
+          skipEmptyLines: true,
+          complete: function(results) {
+            allCourses = normalizeData(results.data);
+            initCategories(allCourses);
+            updateStats(allCourses);
+            applyFilters();
+            skeletonLoader.style.display = 'none';
+
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            statSyncTime.textContent = timeStr;
+          },
+          error: function(err) {
+            console.error('PapaParse error:', err);
+            showError('데이터 파싱 중 오류가 발생했습니다.');
+          }
+        });
+      } catch (err) {
+        console.error('Fetch error:', err);
+        showError('데이터를 로드하는 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.');
+      }
+    }
+
+    // Normalize Data (handles potential header whitespace / missing fields)
+    function normalizeData(rows) {
+      return rows.map(r => {
+        // Find key by matching partial trimmed names
+        const getVal = (candidates) => {
+          for (const c of candidates) {
+            for (const k in r) {
+              if (k.trim() === c) return (r[k] || '').trim();
+            }
+          }
+          return '';
+        };
+
+        const code = getVal(['과정코드', '코드']);
+        const name = getVal(['과정명', '연수명', '제목']);
+        const category = getVal(['분야', '카테고리']);
+        const target = getVal(['대상']);
+        const req = getVal(['이수구분', '구분']);
+        const method = getVal(['교육방식', '방식']);
+        const hours = getVal(['교육시간', '시간']);
+        const capacity = getVal(['정원']);
+        const period = getVal(['교육기간', '기간']);
+        const regPeriod = getVal(['신청기간']);
+        const dept = getVal(['담당부서', '부서']);
+        const summary = getVal(['한줄소개', '소개']);
+        const detail = getVal(['상세소개']);
+        const objectives = getVal(['학습목표']);
+        const curriculum = getVal(['주요내용']);
+        const applyLink = getVal(['신청링크', '신청URL']);
+        const contact = getVal(['문의', '연락처']);
+
+        return {
+          과정코드: code,
+          과정명: name,
+          분야: category,
+          대상: target,
+          이수구분: req,
+          교육방식: method,
+          교육시간: hours,
+          정원: capacity,
+          교육기간: period,
+          신청기간: regPeriod,
+          담당부서: dept,
+          한줄소개: summary,
+          상세소개: detail,
+          학습목표: objectives,
+          주요내용: curriculum,
+          신청링크: applyLink,
+          문의: contact
+        };
+      }).filter(item => item.과정코드 && item.과정코드.startsWith('PNU-'));
+    }
+
+    // Update Dashboard Metrics
+    function updateStats(courses) {
+      statTotal.innerHTML = `${courses.length}<small>개 과정</small>`;
+      
+      const mandatory = courses.filter(c => c.이수구분.includes('필수')).length;
+      statMandatory.innerHTML = `${mandatory}<small>개</small>`;
+
+      const online = courses.filter(c => c.교육방식.includes('온라인')).length;
+      statOnline.innerHTML = `${online}<small>개</small>`;
+
+      document.getElementById('countAll').textContent = courses.length;
+    }
+
+    // Dynamic Category Tabs Generation
+    function initCategories(courses) {
+      const categoryCounts = {};
+      courses.forEach(c => {
+        if (!c.분야) return;
+        categoryCounts[c.분야] = (categoryCounts[c.분야] || 0) + 1;
+      });
+
+      // Preserve existing "전체" tab, append dynamic category tabs
+      const tabsHtml = Object.keys(categoryCounts).map(cat => `
+        <button class="category-tab ${currentFilters.category === cat ? 'active' : ''}" data-category="${cat}">
+          ${cat} <span class="count">${categoryCounts[cat]}</span>
+        </button>
+      `).join('');
+
+      categoryTabs.innerHTML = `
+        <button class="category-tab ${currentFilters.category === 'all' ? 'active' : ''}" data-category="all">
+          전체 <span class="count" id="countAll">${courses.length}</span>
+        </button>
+        ${tabsHtml}
+      `;
+
+      // Re-attach event listeners
+      categoryTabs.querySelectorAll('.category-tab').forEach(btn => {
+        btn.addEventListener('click', () => {
+          categoryTabs.querySelectorAll('.category-tab').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentFilters.category = btn.getAttribute('data-category');
+          applyFilters();
+        });
+      });
+    }
+
+    // Filter & Search Logic
+    function applyFilters() {
+      let filtered = [...allCourses];
+
+      // 1. Search Query
+      if (currentFilters.search) {
+        const q = currentFilters.search.toLowerCase();
+        filtered = filtered.filter(c => 
+          (c.과정명 && c.과정명.toLowerCase().includes(q)) ||
+          (c.과정코드 && c.과정코드.toLowerCase().includes(q)) ||
+          (c.한줄소개 && c.한줄소개.toLowerCase().includes(q)) ||
+          (c.담당부서 && c.담당부서.toLowerCase().includes(q)) ||
+          (c.주요내용 && c.주요내용.toLowerCase().includes(q))
+        );
+      }
+
+      // 2. Category Filter
+      if (currentFilters.category !== 'all') {
+        filtered = filtered.filter(c => c.분야 === currentFilters.category);
+      }
+
+      // 3. Target Audience Filter
+      if (currentFilters.target !== 'all') {
+        filtered = filtered.filter(c => c.대상 && c.대상.includes(currentFilters.target));
+      }
+
+      // 4. Requirement Filter (이수구분)
+      if (currentFilters.req !== 'all') {
+        filtered = filtered.filter(c => c.이수구분 && c.이수구분.includes(currentFilters.req));
+      }
+
+      // 5. Method Filter (교육방식)
+      if (currentFilters.method !== 'all') {
+        filtered = filtered.filter(c => c.교육방식 && c.교육방식.includes(currentFilters.method));
+      }
+
+      // 6. Sorting
+      filtered.sort((a, b) => {
+        if (currentFilters.sort === 'code-asc') {
+          return a.과정코드.localeCompare(b.과정코드);
+        } else if (currentFilters.sort === 'name-asc') {
+          return a.과정명.localeCompare(b.과정명, 'ko');
+        } else if (currentFilters.sort === 'hours-desc') {
+          return parseHours(b.교육시간) - parseHours(a.교육시간);
+        } else if (currentFilters.sort === 'hours-asc') {
+          return parseHours(a.교육시간) - parseHours(b.교육시간);
+        }
+        return 0;
+      });
+
+      renderCourses(filtered);
+    }
+
+    // Helper: parse hours to number
+    function parseHours(hStr) {
+      if (!hStr) return 0;
+      const m = hStr.match(/(\d+)\s*시간/);
+      return m ? parseInt(m[1], 10) : 0;
+    }
+
+    // Render Course Cards
+    function renderCourses(courses) {
+      filteredCountEl.textContent = courses.length;
+
+      if (courses.length === 0) {
+        courseGrid.innerHTML = '';
+        emptyState.style.display = 'block';
+        return;
+      }
+
+      emptyState.style.display = 'none';
+
+      courseGrid.innerHTML = courses.map(c => {
+        // Badges calculation
+        let reqBadgeClass = 'badge-optional';
+        if (c.이수구분.includes('필수')) reqBadgeClass = 'badge-mandatory';
+        else if (c.이수구분.includes('권장')) reqBadgeClass = 'badge-recommended';
+
+        let methodBadgeClass = 'badge-method-offline';
+        let methodIcon = 'fa-chalkboard-user';
+        if (c.교육방식.includes('온라인')) {
+          methodBadgeClass = 'badge-method-online';
+          methodIcon = 'fa-laptop';
+        } else if (c.교육방식.includes('혼합')) {
+          methodBadgeClass = 'badge-method-hybrid';
+          methodIcon = 'fa-layer-group';
+        }
+
+        return `
+          <article class="course-card" onclick="location.href='detail.html?code=${encodeURIComponent(c.과정코드)}'">
+            <div>
+              <div class="card-top">
+                <span class="course-code">${escapeHtml(c.과정코드)}</span>
+                <div class="card-badges">
+                  <span class="badge ${reqBadgeClass}">${escapeHtml(c.이수구분 || '일반')}</span>
+                  <span class="badge ${methodBadgeClass}"><i class="fa-solid ${methodIcon}"></i> ${escapeHtml(c.교육방식)}</span>
+                </div>
+              </div>
+
+              <div class="card-category">
+                <i class="fa-regular fa-folder"></i> ${escapeHtml(c.분야)}
+              </div>
+
+              <h3 class="card-title">${escapeHtml(c.과정명)}</h3>
+              <p class="card-summary">${escapeHtml(c.한줄소개 || c.상세소개 || '')}</p>
+
+              <div class="card-meta-list">
+                <div class="card-meta-item">
+                  <i class="fa-regular fa-calendar-check"></i>
+                  <span>기간: <strong>${escapeHtml(c.교육기간 || '상시')}</strong></span>
+                </div>
+                <div class="card-meta-item">
+                  <i class="fa-regular fa-clock"></i>
+                  <span>시간: <strong>${escapeHtml(c.교육시간 || '-')}</strong></span>
+                </div>
+                <div class="card-meta-item">
+                  <i class="fa-solid fa-user-group"></i>
+                  <span>정원: <strong>${escapeHtml(c.정원 || '무제한')}</strong></span>
+                </div>
+                <div class="card-meta-item">
+                  <i class="fa-solid fa-bullseye"></i>
+                  <span>대상: <strong>${escapeHtml(c.대상 || '전 직원')}</strong></span>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-footer">
+              <div class="card-dept">
+                <i class="fa-solid fa-building-columns"></i> ${escapeHtml(c.담당부서 || '부산대학교')}
+              </div>
+              <a href="detail.html?code=${encodeURIComponent(c.과정코드)}" class="card-action-btn" onclick="event.stopPropagation();">
+                상세보기 <i class="fa-solid fa-arrow-right"></i>
+              </a>
+            </div>
+          </article>
+        `;
+      }).join('');
+    }
+
+    // Escape HTML to prevent XSS
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // Reset All Filters
+    function resetAllFilters() {
+      currentFilters = {
+        search: '',
+        category: 'all',
+        target: 'all',
+        req: 'all',
+        method: 'all',
+        sort: 'code-asc'
+      };
+
+      searchInput.value = '';
+      searchClearBtn.style.display = 'none';
+      sortSelect.value = 'code-asc';
+
+      document.querySelectorAll('.category-tab').forEach(b => {
+        b.classList.toggle('active', b.getAttribute('data-category') === 'all');
+      });
+
+      document.querySelectorAll('.facet-chip').forEach(c => {
+        c.classList.toggle('active', c.getAttribute('data-value') === 'all');
+      });
+
+      applyFilters();
+    }
+
+    // Event Listeners
+    searchInput.addEventListener('input', (e) => {
+      currentFilters.search = e.target.value.trim();
+      searchClearBtn.style.display = currentFilters.search ? 'block' : 'none';
+      applyFilters();
+    });
+
+    searchClearBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      currentFilters.search = '';
+      searchClearBtn.style.display = 'none';
+      searchInput.focus();
+      applyFilters();
+    });
+
+    sortSelect.addEventListener('change', (e) => {
+      currentFilters.sort = e.target.value;
+      applyFilters();
+    });
+
+    document.querySelectorAll('.facet-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const facetType = chip.getAttribute('data-facet');
+        const facetValue = chip.getAttribute('data-value');
+        
+        chip.parentElement.querySelectorAll('.facet-chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+
+        if (facetType === 'target') currentFilters.target = facetValue;
+        if (facetType === 'req') currentFilters.req = facetValue;
+        if (facetType === 'method') currentFilters.method = facetValue;
+
+        applyFilters();
+      });
+    });
+
+    btnResetFilters.addEventListener('click', resetAllFilters);
+    btnRefresh.addEventListener('click', () => {
+      const icon = btnRefresh.querySelector('i');
+      icon.classList.add('fa-spin');
+      loadData().finally(() => {
+        setTimeout(() => icon.classList.remove('fa-spin'), 600);
+      });
+    });
+
+    function showError(msg) {
+      skeletonLoader.style.display = 'none';
+      emptyState.style.display = 'block';
+      emptyState.querySelector('h3').textContent = '데이터를 불러올 수 없습니다';
+      emptyState.querySelector('p').textContent = msg;
+    }
+
+    // Init on page load
+    document.addEventListener('DOMContentLoaded', loadData);
+  </script>
+</body>
+</html>

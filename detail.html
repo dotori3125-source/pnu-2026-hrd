@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>과정 상세 안내 - 2026 부산대학교 직무연수</title>
+  <!-- Pretendard Font CDN -->
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <!-- FontAwesome Icons CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <!-- PapaParse for CSV parsing -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
+  <style>
+    :root {
+      --pnu-blue-dark: #07192f;
+      --pnu-blue: #0b2545;
+      --pnu-blue-light: #134074;
+      --pnu-royal: #1d4ed8;
+      --pnu-royal-hover: #1e40af;
+      --pnu-gold: #c59b27;
+      --pnu-gold-light: #fef3c7;
+      --pnu-gold-dark: #92400e;
+      
+      --bg-body: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-surface-subtle: #f1f5f9;
+      --border-subtle: #e2e8f0;
+      --border-strong: #cbd5e1;
+      
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --text-subtle: #94a3b8;
+      --text-inverted: #ffffff;
+
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --radius-full: 9999px;
+
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(11, 37, 69, 0.08), 0 2px 4px -2px rgba(11, 37, 69, 0.05);
+      --shadow-lg: 0 10px 25px -3px rgba(11, 37, 69, 0.1);
+      --shadow-card: 0 2px 10px rgba(15, 23, 42, 0.04);
+      --shadow-card-hover: 0 12px 28px -4px rgba(11, 37, 69, 0.14);
+      
+      --transition-fast: 0.15s ease;
+      --transition-normal: 0.25s ease;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Navigation */
+    .top-nav {
+      background-color: var(--pnu-blue-dark);
+      color: var(--text-inverted);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(8px);
+    }
+    .top-nav-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0.85rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+    }
+    .btn-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #cbd5e1;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 600;
+      padding: 0.4rem 0.8rem;
+      border-radius: var(--radius-sm);
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      transition: var(--transition-fast);
+    }
+    .btn-back:hover {
+      background: rgba(255, 255, 255, 0.18);
+      color: #ffffff;
+    }
+    .brand-link {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      text-decoration: none;
+      color: inherit;
+    }
+    .brand-emblem {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--pnu-gold), #eab308);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--pnu-blue-dark);
+      font-weight: 900;
+      font-size: 1rem;
+    }
+    .brand-text h1 {
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+
+    /* Course Hero Header */
+    .course-hero {
+      background: linear-gradient(180deg, var(--pnu-blue-dark) 0%, var(--pnu-blue) 100%);
+      color: var(--text-inverted);
+      padding: 3rem 1.5rem 2.5rem;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .hero-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      margin-bottom: 1.25rem;
+    }
+    .breadcrumb a {
+      color: #cbd5e1;
+      text-decoration: none;
+    }
+    .breadcrumb a:hover {
+      text-decoration: underline;
+    }
+    .hero-badges {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+    .badge {
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 0.3rem 0.75rem;
+      border-radius: var(--radius-sm);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .badge-code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      background: rgba(255, 255, 255, 0.15);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+    .badge-mandatory {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+    .badge-recommended {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+    .badge-optional {
+      background: rgba(255, 255, 255, 0.12);
+      color: #e2e8f0;
+    }
+    .badge-category {
+      background: rgba(197, 155, 39, 0.2);
+      color: #fde047;
+      border: 1px solid rgba(197, 155, 39, 0.4);
+    }
+
+    .hero-title {
+      font-size: 2.25rem;
+      font-weight: 800;
+      line-height: 1.3;
+      letter-spacing: -0.03em;
+      margin-bottom: 1rem;
+    }
+    .hero-summary {
+      font-size: 1.1rem;
+      color: #cbd5e1;
+      line-height: 1.6;
+      max-width: 800px;
+    }
+
+    /* Main Container with 2-Column Grid */
+    .container {
+      max-width: 1200px;
+      margin: 2rem auto 4rem;
+      padding: 0 1.5rem;
+      width: 100%;
+      flex: 1;
+    }
+
+    .detail-layout {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 2.5rem;
+      align-items: start;
+    }
+
+    /* Main Content Column */
+    .main-column {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .content-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      box-shadow: var(--shadow-card);
+    }
+    .content-card h3 {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--pnu-blue);
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      border-bottom: 2px solid var(--bg-surface-subtle);
+      padding-bottom: 0.75rem;
+    }
+    .content-card h3 i {
+      color: var(--pnu-royal);
+      font-size: 1.15rem;
+    }
+    .content-card p {
+      font-size: 1rem;
+      line-height: 1.75;
+      color: #334155;
+      white-space: pre-line;
+    }
+
+    /* Objectives List */
+    .objectives-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+    .objective-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      background: var(--bg-surface-subtle);
+      padding: 1rem 1.25rem;
+      border-radius: var(--radius-md);
+      border-left: 4px solid var(--pnu-royal);
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--text-main);
+    }
+    .objective-item i {
+      color: #10b981;
+      font-size: 1.1rem;
+      margin-top: 0.2rem;
+    }
+
+    /* Curriculum Timeline */
+    .curriculum-timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      position: relative;
+    }
+    .curriculum-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1rem 1.25rem;
+      background: var(--bg-surface-subtle);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+      transition: var(--transition-fast);
+    }
+    .curriculum-item:hover {
+      background: #f8fafc;
+      border-color: #93c5fd;
+    }
+    .curriculum-step {
+      min-width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--pnu-blue);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+    .curriculum-text {
+      flex: 1;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-main);
+      padding-top: 0.3rem;
+    }
+
+    /* Policy & Notice Box */
+    .notice-box {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-radius: var(--radius-md);
+      padding: 1.25rem;
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+      color: #92400e;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    .notice-box i {
+      font-size: 1.3rem;
+      color: #d97706;
+      margin-top: 0.2rem;
+    }
+
+    /* Related Courses */
+    .related-courses-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .related-card {
+      background: var(--bg-surface-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: var(--transition-fast);
+    }
+    .related-card:hover {
+      background: #ffffff;
+      box-shadow: var(--shadow-md);
+      border-color: #93c5fd;
+      transform: translateY(-2px);
+    }
+    .related-card-code {
+      font-size: 0.75rem;
+      font-family: monospace;
+      color: var(--pnu-blue-light);
+      font-weight: 700;
+    }
+    .related-card-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin: 0.4rem 0 0.8rem;
+      line-height: 1.4;
+    }
+    .related-card-link {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--pnu-royal);
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    /* Sticky Sidebar */
+    .sidebar {
+      position: sticky;
+      top: 5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .meta-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+      box-shadow: var(--shadow-lg);
+    }
+    .meta-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--pnu-blue);
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .meta-rows {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .meta-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.875rem;
+      padding-bottom: 0.6rem;
+      border-bottom: 1px dashed var(--border-subtle);
+    }
+    .meta-row:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+    .meta-row-label {
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .meta-row-label i {
+      color: var(--pnu-blue-light);
+      width: 16px;
+      text-align: center;
+    }
+    .meta-row-val {
+      font-weight: 700;
+      color: var(--text-main);
+      text-align: right;
+    }
+    .meta-row-val a {
+      color: var(--pnu-royal);
+      text-decoration: none;
+    }
+    .meta-row-val a:hover {
+      text-decoration: underline;
+    }
+
+    /* Main Apply CTA */
+    .btn-apply-cta {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      background: var(--pnu-royal);
+      color: #ffffff;
+      padding: 1rem 1.5rem;
+      border-radius: var(--radius-md);
+      font-size: 1.05rem;
+      font-weight: 700;
+      text-decoration: none;
+      box-shadow: 0 4px 14px rgba(29, 78, 216, 0.35);
+      transition: var(--transition-fast);
+      width: 100%;
+      text-align: center;
+    }
+    .btn-apply-cta:hover {
+      background: var(--pnu-royal-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(29, 78, 216, 0.45);
+    }
+
+    /* Action buttons in sidebar */
+    .sidebar-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+    .btn-secondary {
+      flex: 1;
+      background: var(--bg-surface-subtle);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      padding: 0.6rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      transition: var(--transition-fast);
+    }
+    .btn-secondary:hover {
+      background: #e2e8f0;
+      color: var(--text-main);
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: var(--pnu-blue-dark);
+      color: #ffffff;
+      padding: 0.85rem 1.5rem;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg);
+      font-size: 0.9rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all var(--transition-normal);
+      pointer-events: none;
+      z-index: 1000;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Loading / Error States */
+    .loading-state, .error-state {
+      max-width: 600px;
+      margin: 5rem auto;
+      text-align: center;
+      background: var(--bg-surface);
+      border-radius: var(--radius-lg);
+      padding: 3rem 2rem;
+      box-shadow: var(--shadow-card);
+      border: 1px solid var(--border-subtle);
+    }
+    .loading-state i {
+      font-size: 2.5rem;
+      color: var(--pnu-royal);
+      margin-bottom: 1rem;
+    }
+    .error-state i {
+      font-size: 2.5rem;
+      color: #ef4444;
+      margin-bottom: 1rem;
+    }
+
+    /* Footer */
+    footer {
+      background: var(--pnu-blue-dark);
+      color: #94a3b8;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 2.5rem 1.5rem;
+      margin-top: auto;
+      font-size: 0.85rem;
+    }
+    .footer-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 1.5rem;
+      align-items: center;
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .detail-layout {
+        grid-template-columns: 1fr;
+      }
+      .sidebar {
+        position: static;
+        order: -1;
+      }
+      .hero-title {
+        font-size: 1.75rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation -->
+  <header class="top-nav">
+    <div class="top-nav-inner">
+      <div class="nav-left">
+        <a href="index.html" class="btn-back">
+          <i class="fa-solid fa-arrow-left"></i> 목록으로
+        </a>
+        <a href="index.html" class="brand-link">
+          <div class="brand-emblem">PNU</div>
+          <div class="brand-text">
+            <h1>부산대학교 직무연수 종합 안내</h1>
+          </div>
+        </a>
+      </div>
+      <div>
+        <span style="font-size: 0.8rem; color: #94a3b8;"><i class="fa-solid fa-circle" style="color: #10b981; font-size: 0.6rem;"></i> 실시간 시트 연동</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Loading View -->
+  <div class="loading-state" id="loadingState">
+    <i class="fa-solid fa-circle-notch fa-spin"></i>
+    <h2>과정 정보를 불러오는 중입니다...</h2>
+    <p style="color: var(--text-muted); margin-top: 0.5rem;">구글 시트에서 최신 교육 일정을 실시간으로 동기화하고 있습니다.</p>
+  </div>
+
+  <!-- Error View (Not Found) -->
+  <div class="error-state" id="errorState" style="display: none;">
+    <i class="fa-solid fa-circle-exclamation"></i>
+    <h2>요청하신 과정을 찾을 수 없습니다</h2>
+    <p style="color: var(--text-muted); margin: 0.75rem 0 1.5rem;">과정코드가 올바르지 않거나 삭제된 교육과정입니다.</p>
+    <a href="index.html" class="btn-apply-cta" style="display: inline-flex; width: auto; padding: 0.75rem 1.5rem;">
+      <i class="fa-solid fa-list"></i> 전체 교육과정 목록으로 이동
+    </a>
+  </div>
+
+  <!-- Detail Content Container (Populated via JS) -->
+  <div id="detailContainer" style="display: none;">
+    
+    <!-- Hero Header -->
+    <section class="course-hero">
+      <div class="hero-inner">
+        <nav class="breadcrumb">
+          <a href="index.html">직무연수 포털</a>
+          <i class="fa-solid fa-chevron-right" style="font-size: 0.7rem;"></i>
+          <span id="bcCategory">-</span>
+          <i class="fa-solid fa-chevron-right" style="font-size: 0.7rem;"></i>
+          <span id="bcCode" style="color: #ffffff; font-weight: 600;">-</span>
+        </nav>
+
+        <div class="hero-badges">
+          <span class="badge badge-code" id="heroCode">-</span>
+          <span class="badge badge-category" id="heroCategory">-</span>
+          <span class="badge" id="heroReq">-</span>
+          <span class="badge badge-optional" id="heroMethod">-</span>
+        </div>
+
+        <h1 class="hero-title" id="heroTitle">-</h1>
+        <p class="hero-summary" id="heroSummary">-</p>
+      </div>
+    </section>
+
+    <!-- Main Detail Layout -->
+    <main class="container">
+      <div class="detail-layout">
+
+        <!-- Left Main Column -->
+        <div class="main-column">
+
+          <!-- 01. Course Overview -->
+          <article class="content-card">
+            <h3><i class="fa-solid fa-circle-info"></i> 과정 상세 소개</h3>
+            <p id="descDetail">-</p>
+          </article>
+
+          <!-- 02. Learning Objectives -->
+          <article class="content-card">
+            <h3><i class="fa-solid fa-bullseye"></i> 핵심 학습 목표</h3>
+            <ul class="objectives-list" id="objectivesList"></ul>
+          </article>
+
+          <!-- 03. Curriculum & Syllabus -->
+          <article class="content-card">
+            <h3><i class="fa-solid fa-list-check"></i> 주요 교육 내용</h3>
+            <div class="curriculum-timeline" id="curriculumTimeline"></div>
+          </article>
+
+          <!-- 04. Academic Notice & Policy -->
+          <div class="notice-box">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <div>
+              <strong>수강 이수 기준 및 출결 안내</strong><br>
+              본 교육과정은 부산대학교 교직원 직무역량 교육훈련 지침에 따라 운영됩니다. 집합과정은 80% 이상 출석, 온라인과정은 진도율 100% 및 설문 제출 시 최종 이수가 인정되며, 상시학습 시간으로 등록됩니다.
+            </div>
+          </div>
+
+          <!-- 05. Related Courses in Same Category -->
+          <article class="content-card">
+            <h3><i class="fa-solid fa-layer-group"></i> 동일 분야 추천 과정</h3>
+            <div class="related-courses-grid" id="relatedGrid"></div>
+          </article>
+
+        </div>
+
+        <!-- Right Sticky Meta Sidebar -->
+        <aside class="sidebar">
+          <div class="meta-card">
+            <h4 class="meta-title">연수 개요 및 신청 정보</h4>
+            
+            <div class="meta-rows">
+              <div class="meta-row">
+                <span class="meta-row-label"><i class="fa-solid fa-laptop"></i> 교육방식</span>
+                <span class="meta-row-val" id="metaMethod">-</span>
+              </div>
+              <div class="meta-row">
+                <span class="meta-row-label"><i class="fa-regular fa-clock"></i> 교육시간</span>
+                <span class="meta-row-val" id="metaHours">-</span>
+              </div>
+              <div class="meta-row">
+                <span class="meta-row-label"><i class="fa-regular fa-calendar-days"></i> 교육기간</span>
+                <span class="meta-row-val" id="metaPeriod">-</span>
+              </div>
+              <div class="meta-row">
+                <span class="meta-row-label"><i class="fa-regular fa-calendar-check"></i> 신청기간</span>
+                <span class="meta-row-val" id="metaRegPeriod">-</span>
+              </div>
+              <div class="meta-row">
+                <span class="meta-row-label"><i class="fa-solid fa-user-group"></i> 모집정원</span>
+                <span class="meta-row-val" id="metaCapacity">-</span>
+              </div>
+              <div class="meta-row">
+                <span class="meta-row-label"><i class="fa-solid fa-user-tag"></i> 교육대상</span>
+                <span class="meta-row-val" id="metaTarget">-</span>
+              </div>
+              <div class="meta-row">
+                <span class="meta-row-label"><i class="fa-solid fa-building-columns"></i> 담당부서</span>
+                <span class="meta-row-val" id="metaDept">-</span>
+              </div>
+              <div class="meta-row">
+                <span class="meta-row-label"><i class="fa-solid fa-phone"></i> 문의처</span>
+                <span class="meta-row-val" id="metaContact">-</span>
+              </div>
+            </div>
+
+            <!-- Main CTA -->
+            <a href="#" id="btnApply" class="btn-apply-cta" target="_blank" rel="noopener noreferrer">
+              <span>연수 신청 바로가기</span>
+              <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            </a>
+
+            <!-- Action buttons -->
+            <div class="sidebar-actions">
+              <button class="btn-secondary" id="btnShare">
+                <i class="fa-regular fa-copy"></i> 링크 복사
+              </button>
+              <button class="btn-secondary" onclick="window.print()">
+                <i class="fa-solid fa-print"></i> 안내 인쇄
+              </button>
+            </div>
+          </div>
+        </aside>
+
+      </div>
+    </main>
+
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast">
+    <i class="fa-solid fa-circle-check" style="color: #34d399;"></i>
+    <span id="toastMsg">링크가 클립보드에 복사되었습니다.</span>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-inner">
+      <div>
+        <strong style="color: #ffffff;">부산대학교 교육훈련 안내 시스템</strong>
+        <p style="margin-top: 0.25rem;">본 사이트는 구글 스프레드시트와 실시간 연동되어 2026학년도 연수 계획을 안내합니다.</p>
+      </div>
+      <div>
+        <span>문의: 인재개발원 (051-510-1231) | 부산광역시 금정구 부산대학로63번길 2</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1sWeq6LCPTp0I6ith07XQizLm-KcDvAcbeNZBHkOBOvk/gviz/tq?tqx=out:csv&sheet=data&headers=1';
+
+    // Get Course Code from URL parameter (?code=PNU-2026-...)
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetCode = urlParams.get('code') || '';
+
+    async function loadDetail() {
+      if (!targetCode) {
+        showNotFound();
+        return;
+      }
+
+      try {
+        const fetchUrl = `${SHEET_CSV_URL}&_cb=${Date.now()}`;
+        const response = await fetch(fetchUrl);
+        if (!response.ok) throw new Error('구글 시트 로드 실패');
+
+        const csvText = await response.text();
+
+        Papa.parse(csvText, {
+          header: true,
+          skipEmptyLines: true,
+          complete: function(results) {
+            const allCourses = normalizeData(results.data);
+            const course = allCourses.find(c => c.과정코드.toUpperCase() === targetCode.trim().toUpperCase());
+
+            if (!course) {
+              showNotFound();
+              return;
+            }
+
+            renderDetail(course, allCourses);
+          },
+          error: function() {
+            showNotFound();
+          }
+        });
+      } catch (e) {
+        console.error(e);
+        showNotFound();
+      }
+    }
+
+    function normalizeData(rows) {
+      return rows.map(r => {
+        const getVal = (candidates) => {
+          for (const c of candidates) {
+            for (const k in r) {
+              if (k.trim() === c) return (r[k] || '').trim();
+            }
+          }
+          return '';
+        };
+
+        return {
+          과정코드: getVal(['과정코드', '코드']),
+          과정명: getVal(['과정명', '연수명', '제목']),
+          분야: getVal(['분야', '카테고리']),
+          대상: getVal(['대상']),
+          이수구분: getVal(['이수구분', '구분']),
+          교육방식: getVal(['교육방식', '방식']),
+          교육시간: getVal(['교육시간', '시간']),
+          정원: getVal(['정원']),
+          교육기간: getVal(['교육기간', '기간']),
+          신청기간: getVal(['신청기간']),
+          담당부서: getVal(['담당부서', '부서']),
+          한줄소개: getVal(['한줄소개', '소개']),
+          상세소개: getVal(['상세소개']),
+          학습목표: getVal(['학습목표']),
+          주요내용: getVal(['주요내용']),
+          신청링크: getVal(['신청링크', '신청URL']),
+          문의: getVal(['문의', '연락처'])
+        };
+      }).filter(item => item.과정코드 && item.과정코드.startsWith('PNU-'));
+    }
+
+    function renderDetail(c, allCourses) {
+      document.title = `${c.과정명} - 2026 부산대학교 직무연수`;
+
+      // Breadcrumb
+      document.getElementById('bcCategory').textContent = c.분야;
+      document.getElementById('bcCode').textContent = c.과정코드;
+
+      // Hero
+      document.getElementById('heroCode').textContent = c.과정코드;
+      document.getElementById('heroCategory').textContent = c.분야;
+      document.getElementById('heroMethod').textContent = c.교육방식;
+
+      const heroReq = document.getElementById('heroReq');
+      heroReq.textContent = c.이수구분 || '일반';
+      if (c.이수구분.includes('필수')) {
+        heroReq.className = 'badge badge-mandatory';
+      } else if (c.이수구분.includes('권장')) {
+        heroReq.className = 'badge badge-recommended';
+      } else {
+        heroReq.className = 'badge badge-optional';
+      }
+
+      document.getElementById('heroTitle').textContent = c.과정명;
+      document.getElementById('heroSummary').textContent = c.한줄소개 || c.상세소개 || '';
+
+      // Main Column: Overview
+      document.getElementById('descDetail').textContent = c.상세소개 || c.한줄소개 || '등록된 상세 소개가 없습니다.';
+
+      // Main Column: Learning Objectives
+      const objectivesList = document.getElementById('objectivesList');
+      if (c.학습목표) {
+        const objectives = c.학습목표.split(/·|\n|•/).map(s => s.trim()).filter(Boolean);
+        objectivesList.innerHTML = objectives.map(obj => `
+          <li class="objective-item">
+            <i class="fa-solid fa-circle-check"></i>
+            <span>${escapeHtml(obj)}</span>
+          </li>
+        `).join('');
+      } else {
+        objectivesList.innerHTML = `<li class="objective-item"><span>과정 이수를 통한 직무역량 강화를 목표로 합니다.</span></li>`;
+      }
+
+      // Main Column: Curriculum
+      const curriculumTimeline = document.getElementById('curriculumTimeline');
+      if (c.주요내용) {
+        const modules = c.주요내용.split(/·|\n|•/).map(s => s.trim()).filter(Boolean);
+        curriculumTimeline.innerHTML = modules.map((mod, idx) => `
+          <div class="curriculum-item">
+            <div class="curriculum-step">${idx + 1}</div>
+            <div class="curriculum-text">${escapeHtml(mod)}</div>
+          </div>
+        `).join('');
+      } else {
+        curriculumTimeline.innerHTML = `<div class="curriculum-item"><div class="curriculum-step">1</div><div class="curriculum-text">상세 커리큘럼은 수강신청 시 제공됩니다.</div></div>`;
+      }
+
+      // Sidebar: Meta
+      document.getElementById('metaMethod').textContent = c.교육방식 || '-';
+      document.getElementById('metaHours').textContent = c.교육시간 || '-';
+      document.getElementById('metaPeriod').textContent = c.교육기간 || '상시';
+      document.getElementById('metaRegPeriod').textContent = c.신청기간 || '상시';
+      document.getElementById('metaCapacity').textContent = c.정원 || '무제한';
+      document.getElementById('metaTarget').textContent = c.대상 || '전 직원';
+      document.getElementById('metaDept').textContent = c.담당부서 || '부산대학교';
+
+      const metaContact = document.getElementById('metaContact');
+      if (c.문의) {
+        // extract phone number if present
+        const phoneMatch = c.문의.match(/(\d{2,3}-\d{3,4}-\d{4})/);
+        if (phoneMatch) {
+          metaContact.innerHTML = `${escapeHtml(c.문의)} <br><a href="tel:${phoneMatch[1]}" style="font-size:0.8rem;"><i class="fa-solid fa-phone"></i> 전화걸기</a>`;
+        } else {
+          metaContact.textContent = c.문의;
+        }
+      } else {
+        metaContact.textContent = '인재개발원 051-510-1231';
+      }
+
+      // Sidebar: Apply Link
+      const btnApply = document.getElementById('btnApply');
+      if (c.신청링크 && c.신청링크.startsWith('http')) {
+        btnApply.href = c.신청링크;
+        btnApply.style.display = 'flex';
+      } else {
+        btnApply.href = `https://hrd.pusan.ac.kr/course/${c.과정코드}`;
+      }
+
+      // Related Courses (same category, different code)
+      const relatedCourses = allCourses.filter(item => item.분야 === c.분야 && item.과정코드 !== c.과정코드).slice(0, 3);
+      const relatedGrid = document.getElementById('relatedGrid');
+      if (relatedCourses.length > 0) {
+        relatedGrid.innerHTML = relatedCourses.map(rc => `
+          <a href="detail.html?code=${encodeURIComponent(rc.과정코드)}" class="related-card">
+            <div>
+              <span class="related-card-code">${escapeHtml(rc.과정코드)}</span>
+              <h5 class="related-card-title">${escapeHtml(rc.과정명)}</h5>
+            </div>
+            <div class="related-card-link">
+              <span>자세히 보기</span>
+              <i class="fa-solid fa-arrow-right"></i>
+            </div>
+          </a>
+        `).join('');
+      } else {
+        relatedGrid.innerHTML = `<p style="color: var(--text-muted); font-size: 0.9rem;">동일 분야의 다른 추천 과정이 없습니다.</p>`;
+      }
+
+      // Show container
+      document.getElementById('loadingState').style.display = 'none';
+      document.getElementById('detailContainer').style.display = 'block';
+    }
+
+    function showNotFound() {
+      document.getElementById('loadingState').style.display = 'none';
+      document.getElementById('detailContainer').style.display = 'none';
+      document.getElementById('errorState').style.display = 'block';
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // Share link functionality
+    document.getElementById('btnShare').addEventListener('click', () => {
+      navigator.clipboard.writeText(window.location.href).then(() => {
+        showToast('과정 안내 링크가 클립보드에 복사되었습니다.');
+      }).catch(() => {
+        showToast('링크 복사에 실패했습니다.');
+      });
+    });
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastMsg').textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+
+    document.addEventListener('DOMContentLoaded', loadDetail);
+  </script>
+</body>
+</html>
